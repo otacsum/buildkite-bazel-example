@@ -1,5 +1,63 @@
-image: "sorchaabel/bazel-pipeline-example:1.0"
+# Buildkite pipeline: critical-path CI for this Bazel POC.
+#
+# Models the critical path of the org's ccf-ci-bazel framework at MVP scale:
+#   checkout -> bazel build -> bazel test -> final status gate
+#
+# "Required" here is convention-level only, not enforced by Buildkite.
+# Nothing in this repo prevents a maintainer with write access to this file
+# from deleting the test step (or its depends_on) while the pipeline still
+# reports green. Real enforcement of "test is required" would need an
+# Enterprise Pipeline Template, a read-only pipeline, or an agent-side
+# lifecycle hook — none of which are available on the free tier or used
+# here. Treat the ordering/gating below as documented intent, not a
+# guarantee.
+#
+# Runner: this pipeline targets a local, self-hosted Buildkite agent that has
+# Bazel 9.2.0 installed natively (Homebrew/bazelisk). It intentionally does
+# NOT use a Docker image. The previous version of this file had a top-level
+# `image:` key. That key is real, documented Buildkite schema, but it only
+# takes effect under Buildkite's Kubernetes Agent Stack controller or
+# (experimentally) Buildkite Hosted Agents — neither applies to our plain
+# self-hosted agent process, so it had no effect and the build was already
+# running natively against whatever Bazel is on the agent's PATH, not inside
+# the referenced container. Since the target agent has no guaranteed Docker
+# install, running natively (no image, no docker plugin) is the simplest
+# option that will reliably work, and it matches what was actually happening
+# before.
+#
+# Agent targeting: no `agents:` queue tag is set on any step below. That's
+# fine today with a single local Bazel-equipped agent, but if a second agent
+# without Bazel is ever added to the same queue, these steps should get an
+# `agents: { queue: <name> }` tag so they don't land on the wrong machine.
+#
+# Free-tier sizing: 3 steps total, no matrix, single agent. Well within the
+# free tier's 10 concurrent job cap and 2,000 Linux vCPU-minutes/month.
+# No remote cache (S3/GCS) is configured for this POC — each step re-runs
+# Bazel's local analysis/build; noting the omission rather than assuming
+# caching exists.
+
 steps:
   - label: ":bazel: Build"
-    commands:
-      - bazel build //main:hello-world
+    key: build
+    command: bazel build //main:hello-world
+    timeout_in_minutes: 10
+
+  - label: ":bazel: Test"
+    key: test
+    depends_on: build
+    command: bazel test //main:greet_test --test_output=errors
+    timeout_in_minutes: 10
+
+  # Redundant with `depends_on` on the status step below by design: this is
+  # deliberate belt-and-suspenders for a demo pipeline, not an oversight.
+  # `depends_on` alone would already gate `status` on build/test; the
+  # explicit `wait` is kept for readability/illustration of the gate.
+  - wait
+
+  - label: ":white_check_mark: Status"
+    key: status
+    depends_on:
+      - build
+      - test
+    command: 'echo "Build and test succeeded: critical path is green."'
+    timeout_in_minutes: 5

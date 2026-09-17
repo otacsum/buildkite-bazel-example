@@ -2,9 +2,7 @@
 #include <string>
 #include <iostream>
 
-std::string get_greet(const std::string& who) {
-  return "Hello " + who;
-}
+#include "main/greet.h"
 
 void print_localtime() {
   std::time_t result = std::time(nullptr);
