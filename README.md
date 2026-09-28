@@ -79,6 +79,3 @@ xcode-select --install
 
 See [LICENSE](LICENSE) (MIT)
 
-## Noop
-
-This line added to the readme, Bazel should not build.
