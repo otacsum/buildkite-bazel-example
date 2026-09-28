@@ -12,12 +12,6 @@ cc_binary(
     deps = [":greet"],
 )
 
-cc_binary(
-    name = "hello-world-2",
-    srcs = ["hello-world.cc"],
-    deps = [":greet"],
-)
-
 cc_test(
     name = "greet_test",
     srcs = ["greet_test.cc"],
