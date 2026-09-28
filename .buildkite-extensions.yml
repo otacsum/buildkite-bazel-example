@@ -1,0 +1,13 @@
+jobs:
+  - name: "docs-check"
+    commands:
+      - "echo Checking that maintainer-facing docs exist..."
+      - "test -f README.md && echo README.md present"
+      - "test -f PRESCRIPTIVE-CI.md && echo PRESCRIPTIVE-CI.md present"
+    timeout_minutes: 3
+
+  - name: "hello-maintainer"
+    commands:
+      - "echo This job was added entirely by editing .buildkite-extensions.yml"
+      - "echo No dashboard access was needed to add it, and it cannot touch build/test/status"
+    timeout_minutes: 2
