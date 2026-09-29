@@ -7,7 +7,7 @@ int main() {
     std::cerr << "FAIL: get_greet(\"world\") != \"Hello world\"" << std::endl;
     return 1;
   }
-  if (!(get_greet("") == "Hello dynamic Bazel pipelines ")) {
+  if (!(get_greet("") == "Hello dynamic Bazel pipelines 2 ")) {
     std::cerr << "FAIL: get_greet(\"\") != \"Hello \"" << std::endl;
     return 1;
   }
