@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main() {
-  if (!(get_greet("world") == "Hello dynamic Bazel pipelines world")) {
+  if (!(get_greet("world") == "Hello dynamic Bazel pipelines 2 world")) {
     std::cerr << "FAIL: get_greet(\"world\") != \"Hello world\"" << std::endl;
     return 1;
   }
